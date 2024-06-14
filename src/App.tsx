@@ -24,7 +24,12 @@ function App() {
   // const [money, setMoney] = React.useState(100)
   const [state, dispatch] = React.useReducer(formReducer, formData);
   const nameInputRef = React.useRef(null);
-
+  
+  // a more scalable approcah to using useRef
+  const inputRefs = React.useRef([])
+  const focusInput = (index) => {
+    inputRefs.current[index].focus();
+  };
   const handleRef = () => {
     nameInputRef?.current?.focus();
   }
@@ -49,6 +54,18 @@ function App() {
   };
   return (
     <>
+    {/* and a more reusable way to use the scallable useRef */}
+    {[...Array(5)].map((_, index) => (
+      <>
+        <button onClick={()=>focusInput(index)}>foucs</button>
+        <input
+          key={index}
+          ref={(el) => (inputRefs.current[index] = el)}
+          type="text"
+          placeholder={`Input ${index + 1}`}
+        />
+      </>
+      ))}
       <button onClick={handleRef}>Focus</button>
       <form onSubmit={handleSubmit}>
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
