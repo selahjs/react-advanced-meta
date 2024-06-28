@@ -1,77 +1,96 @@
-import { useEffect, useState } from "react";
 import "./App.css";
-interface IParams {
-  render: any;
-  url?: any;
-}
+import { useState } from "react";
 
-// the component who is going to use the render prop / data fetcher can choose how to display/render the data
-// we can easiliy reuse the component 
-const DataFetcher = ({ render, url }: IParams) => {
-  const [data, setData] = useState<any>([]);
-
-  useEffect(() => {
-    if (url.includes("people")) {
-      setData(["Mubarek", "Redwan", "Selahadin"]);
-    } else {
-      setData(["React", "Angular"]);
-    }
-  }, []);
-
-  return render(data);
-};
-
-const People = () => {
+const PasswordErrorMessage = () => {
   return (
-    <>
-      <DataFetcher
-        url={"http://example.com/people"}
-        render={(data: any) => {
-          if (!data.length) {
-            return <p>loading...</p>;
-          }
-          return (
-            <div style={{ border: 'solid'}}>
-              <p>I'm using this component to list the data</p>
-              <hr />
-              <h2>People</h2>
-              <p>There are {data.length} people, which are:</p>
-              <ul>
-                {data.map((d) => (
-                  <li>{d}</li>
-                ))}
-              </ul>
-            </div>
-          );
-        }}
-      />
-    </>
+    <p className="FieldError">Password should have at least 8 characters</p>
   );
 };
-const Languages = () => {
-  return (
-    <div style={{ border: 'solid', marginTop: 1}}>
-      <DataFetcher
-        url={"http://example.com/languages"}
-        render={(data: any) => (
-          <div>
-            <p>I'm using this component to show number of data</p>
-            <hr />
-            <p>there are {data.length} frontend libraries</p>
-          </div>
-        )}
-      />
-    </div>
-  );
+
+const validateEmail = (email) => {
+  return String(email)
+    .toLowerCase()
+    .match(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    );
 };
 
 function App() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState({
+    value: "",
+    isTouched: false,
+  });
+  const [role, setRole] = useState("role");
+
+  const getIsFormValid = () => {
+    if (firstName != "" && validateEmail(email) && password.value.length >= 8 && (role == "individual" || role == "business")) {
+      return true;
+    }
+    return false;
+  };
+
+  const clearForm = () => {
+    setFirstName("")
+    setLastName("")
+    setEmail("")
+    setPassword({
+        value: "",
+        isTouched: false,
+      })
+    setRole("role");
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    alert("Account created!");
+    clearForm();
+  };
   return (
-    <div>
-      <header>Using render props</header>
-      <hr />
-      <People />
-      <Languages />
+    <div className="App">
+      <form onSubmit={handleSubmit}>
+        <fieldset>
+          <h2>Sign Up</h2>
+          <div className="Field">
+            <label>
+              First name <sup>*</sup>
+            </label>
+            <input value={firstName} onChange={e=> setFirstName(e.target.value)} placeholder="First name" />
+          </div>
+          <div className="Field">
+            <label>Last name</label>
+            <input value={lastName} onChange={e=> setLastName(e.target.value)} placeholder="Last name" />
+          </div>
+          <div className="Field">
+            <label>
+              Email address <sup>*</sup>
+            </label>
+            <input value={email} onChange={e=> setEmail(e.target.value)} placeholder="Email address" />
+          </div>
+          <div className="Field">
+            <label>
+              Password <sup>*</sup>
+            </label>
+            <input value={password.value} onBlur={() => setPassword({ ...password, isTouched: true, })} onChange={e => setPassword({ ...password, value: e.target.value, })} placeholder="Password" />
+            {(password.isTouched && password.value.length < 8) && <PasswordErrorMessage />}
+          </div>
+          <div className="Field">
+            <label>
+              Role <sup>*</sup>
+            </label>
+            <select value={role} onChange={e=> setRole(e.target.value)}>
+              <option value="role">Role</option>
+              <option value="individual">Individual</option>
+              <option value="business">Business</option>
+            </select>
+          </div>
+          <button type="submit" disabled={!getIsFormValid()}>
+            Create account
+          </button>
+        </fieldset>
+      </form>
     </div>
   );
 }
